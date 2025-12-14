@@ -1,0 +1,13 @@
+# Docker
+*.log
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# Temporary files
+*.tmp
+*.bak
