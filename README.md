@@ -2,6 +2,11 @@
 
 > **Experimental**: This is a personal project and is not officially supported by DigitalOcean. APIs may change without notice.
 
+This is part of 3 projects to scale Agentic workflows with DigitalOcean App Platform. The concepts are generic and should work with any PaaS:
+- Safe local sandboxing using DevContainers (this repo or [do-app-devcontainer](https://github.com/bikramkgupta/do-app-devcontainer))
+- Rapid development iteration using hot reload ([do-app-hot-reload-template](https://github.com/bikramkgupta/do-app-hot-reload-template))
+- Disposable environments using sandboxes for parallel experimentation and debugging ([do-app-sandbox](https://github.com/bikramkgupta/do-app-sandbox))
+
 This repo provides a reusable `.devcontainer` setup for **DigitalOcean App Platform developers** who want a realistic, cloud-like development environment on their laptop.
 
 Use this if:
