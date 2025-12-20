@@ -13,7 +13,7 @@ Use this if:
 - you are building or operating **DigitalOcean app platform** and want a standard, batteries-included dev environment for your teams, or
 - you are an **application developer** and want to spin up all the platform dependencies (databases, queues, object storage, etc.) locally with one command.
 
-All you need on your machine is **Docker (or any Docker-compatible runtime)** installed and running (e.g. Docker Desktop, Orbstack, Moby, or Podman with Docker API). You do **not** need to install Postgres, MongoDB, Kafka, MinIO, or other services manually; they are started for you via Docker Compose when the Dev Container comes up.
+All you need on your machine is **Docker (or any Docker-compatible runtime)** installed and running (e.g. Docker Desktop, Orbstack, Moby, or Podman with Docker API). You do **not** need to install Postgres, MongoDB, Kafka, RustFS, or other services manually; they are started for you via Docker Compose when the Dev Container comes up.
 
 Once you open your project in this Dev Container, you should hit the “aha” moment quickly: your editor, runtimes (Node, Python, etc.), and backing services are all wired together and ready to use, without additional local setup.
 
@@ -35,9 +35,9 @@ This configuration uses **Docker Compose Profiles** to manage the various servic
    - `postcreate.sh`
    - `.env`
 
-3. **Customize your setup**  
+3. **Customize your setup**
    Edit `devcontainer.json` to choose:
-   - which services you want (databases, kafka, minio, etc.)
+   - which services you want (databases, kafka, object storage, etc.)
    - which language/tooling you need (Node, Python, Go, Rust, etc.)
 
 4. **Open the folder in a Dev Container**  
@@ -61,7 +61,9 @@ To install additional languages or tools, open `.devcontainer/devcontainer.json`
 By default, the following services are enabled via the `COMPOSE_PROFILES` environment variable in `devcontainer.json`:
 
 - **PostgreSQL** (`postgres`)
-- **MinIO** (`minio`)
+- **RustFS** (`minio`) - S3-compatible object storage
+
+> **Note:** The `minio` profile name is kept for backward compatibility but uses [RustFS](https://github.com/rustfs/rustfs), a high-performance S3-compatible object storage built in Rust.
 
 ## Enabling Additional Services
 
@@ -85,7 +87,8 @@ Replace `mongo` with the profile name of the service you want to start.
 - `mysql`
 - `valkey`
 - `kafka`
-- `minio`
+- `minio` (RustFS - S3-compatible object storage)
+- `opensearch`
 
 ### 2. Persistent Configuration
 
@@ -161,13 +164,14 @@ docker compose -f .devcontainer/docker-compose.yml port minio 9001
 
 Use the dynamically assigned port shown in `docker compose ps`. For example:
 - Postgres: `psql -h 127.0.0.1 -p 54321 -U postgres -d app` (where 54321 is the assigned port)
-- MinIO Console: Open `http://localhost:54322` in browser (where 54322 is the assigned port)
+- RustFS Console: Open `http://localhost:54322` in browser (where 54322 is the assigned port)
+  - Default credentials: `rustfsadmin` / `rustfsadmin`
 
 **Inside the container:**
 
 Your applications connect using standard ports and service names:
 - Database: `postgres:5432`
-- MinIO: `minio:9000`
+- RustFS (S3): `minio:9000` (service name kept for backward compatibility)
 
 ### Copying .devcontainer to a New Workspace
 
@@ -192,4 +196,51 @@ You'll notice `COMPOSE_PROFILES` is defined in two places:
 - VS Code Dev Containers reads this to know which services to start
 
 **Best Practice:** Keep both values in sync to ensure consistent behavior.
+
+## Testing Services
+
+This project includes a comprehensive test suite to verify that all services are working correctly. Tests perform full CRUD operations to ensure connectivity and functionality.
+
+### Running Tests
+
+From inside the dev container, run:
+
+```bash
+# Test all running services
+./tests/run-all-tests.sh --all
+
+# Test specific services
+./tests/run-all-tests.sh postgres minio
+
+# List available services
+./tests/run-all-tests.sh --list
+
+# Show help
+./tests/run-all-tests.sh --help
+```
+
+### Available Test Scripts
+
+| Service | Script | What It Tests |
+|---------|--------|---------------|
+| PostgreSQL | `test-postgres.sh` | Table CRUD, row operations |
+| RustFS (S3) | `test-rustfs.sh` | Bucket CRUD, object upload/download |
+| MySQL | `test-mysql.sh` | Table CRUD, row operations |
+| MongoDB | `test-mongo.sh` | Collection CRUD, document operations |
+| Valkey | `test-valkey.sh` | Key/value, hash, list operations |
+| Kafka | `test-kafka.sh` | Topic CRUD, produce/consume messages |
+| OpenSearch | `test-opensearch.sh` | Index CRUD, document search |
+
+### Test Requirements
+
+Tests use native CLI tools for each service:
+- **PostgreSQL**: `psql` (postgresql-client)
+- **MySQL**: `mysql` (mysql-client)
+- **MongoDB**: `mongosh` (mongodb-mongosh)
+- **RustFS**: `aws` CLI (awscli)
+- **Valkey**: `valkey-cli` or `redis-cli`
+- **Kafka**: Kafka CLI tools (kafka-topics.sh, etc.)
+- **OpenSearch**: `curl`
+
+Most tools are available in the dev container. Install any missing ones as needed.
 

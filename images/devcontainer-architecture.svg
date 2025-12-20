@@ -69,7 +69,7 @@
 
   <!-- Active Backing Services (based on COMPOSE_PROFILES) -->
   <text x="850" y="160" class="label" text-anchor="middle" font-weight="bold">Active Services</text>
-  <text x="850" y="178" class="small-label" text-anchor="middle">(COMPOSE_PROFILES: app,postgres,minio)</text>
+  <text x="850" y="178" class="small-label" text-anchor="middle">(COMPOSE_PROFILES: app,postgres,minio [RustFS])</text>
 
   <!-- PostgreSQL -->
   <rect class="backing-service" x="690" y="200" width="140" height="90"/>
@@ -80,9 +80,9 @@
   <rect class="volume-box" x="705" y="295" width="110" height="25"/>
   <text x="760" y="312" class="small-label" text-anchor="middle">postgres-data</text>
 
-  <!-- MinIO -->
+  <!-- RustFS (S3-compatible, profile: minio) -->
   <rect class="backing-service" x="870" y="200" width="140" height="90"/>
-  <text x="940" y="225" class="label" text-anchor="middle" font-weight="bold">MinIO</text>
+  <text x="940" y="225" class="label" text-anchor="middle" font-weight="bold">RustFS</text>
   <text x="940" y="243" class="small-label" text-anchor="middle">API: 9000</text>
   <text x="940" y="258" class="small-label" text-anchor="middle">Console: 9001</text>
   <text x="940" y="273" class="small-label" text-anchor="middle">S3-compatible</text>
@@ -150,6 +150,6 @@
   <text x="650" y="775" class="small-label" font-weight="bold">Active Profiles:</text>
   <text x="650" y="795" class="small-label">• app: Main development container</text>
   <text x="650" y="813" class="small-label">• postgres: PostgreSQL database</text>
-  <text x="650" y="831" class="small-label">• minio: S3-compatible object storage</text>
+  <text x="650" y="831" class="small-label">• minio: RustFS (S3-compatible storage)</text>
   <text x="650" y="849" class="small-label">(Add mongo, mysql, valkey, kafka, opensearch as needed)</text>
 </svg>
