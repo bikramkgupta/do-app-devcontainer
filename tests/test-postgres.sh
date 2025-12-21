@@ -92,12 +92,11 @@ test_verify_table_dropped() {
 
 # Main test execution
 main() {
-    # Check if psql is available
-    if ! command -v psql &> /dev/null; then
-        fail "psql client not found. Please install postgresql-client."
+    # Install psql client if not available
+    install_if_missing psql postgresql-client || {
         print_summary "PostgreSQL"
         exit 1
-    fi
+    }
 
     # Run tests
     run_test "Connectivity to PostgreSQL" test_connectivity

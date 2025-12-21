@@ -127,10 +127,10 @@ run_service_test() {
 
     if bash "$script_path"; then
         TEST_RESULTS[$service]="passed"
-        ((TOTAL_PASSED++))
+        ((++TOTAL_PASSED)) || true
     else
         TEST_RESULTS[$service]="failed"
-        ((TOTAL_FAILED++))
+        ((++TOTAL_FAILED)) || true
     fi
 }
 

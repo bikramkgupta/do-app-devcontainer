@@ -45,8 +45,7 @@ configure_aws() {
 
 # Test 1: Connectivity
 test_connectivity() {
-    curl -sf "${S3_ENDPOINT}/minio/health/live" > /dev/null 2>&1 || \
-    curl -sf "${S3_ENDPOINT}/" > /dev/null 2>&1
+    curl -sf "${S3_ENDPOINT}/health" > /dev/null 2>&1
 }
 
 # Test 2: Create bucket
@@ -99,11 +98,9 @@ test_verify_bucket_deleted() {
 
 # Main test execution
 main() {
-    # Check prerequisites
+    # Install AWS CLI if not available
     if ! check_aws_cli; then
-        warn "AWS CLI not found. Installing via pip..."
-        pip install awscli --quiet 2>/dev/null || pip3 install awscli --quiet 2>/dev/null || {
-            fail "Could not install AWS CLI. Please install it manually."
+        pip_install_if_missing aws awscli || {
             print_summary "RustFS"
             exit 1
         }

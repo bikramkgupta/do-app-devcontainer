@@ -89,12 +89,11 @@ test_verify_table_dropped() {
 
 # Main test execution
 main() {
-    # Check if mysql client is available
-    if ! command -v mysql &> /dev/null; then
-        fail "mysql client not found. Please install mysql-client."
+    # Install mysql client if not available
+    install_if_missing mysql default-mysql-client || {
         print_summary "MySQL"
         exit 1
-    fi
+    }
 
     # Run tests
     run_test "Connectivity to MySQL" test_connectivity

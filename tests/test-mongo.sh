@@ -97,14 +97,44 @@ test_verify_collection_dropped() {
     [ "$result" = "false" ]
 }
 
+# Install mongosh from MongoDB repository
+install_mongosh() {
+    if command -v mongosh &> /dev/null; then
+        return 0
+    fi
+    
+    info "Installing MongoDB Shell (mongosh)..."
+    
+    # Install dependencies
+    sudo apt-get update -qq 2>/dev/null
+    sudo apt-get install -y -qq gnupg curl 2>/dev/null
+    
+    # Import MongoDB public GPG key
+    curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc | \
+        sudo gpg --dearmor -o /usr/share/keyrings/mongodb-server-8.0.gpg 2>/dev/null
+    
+    # Add MongoDB repository (Ubuntu Noble 24.04)
+    echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/8.0 multiverse" | \
+        sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list > /dev/null
+    
+    # Install mongosh
+    sudo apt-get update -qq 2>/dev/null
+    if sudo apt-get install -y -qq mongodb-mongosh 2>/dev/null; then
+        success "Installed mongosh"
+        return 0
+    else
+        fail "Failed to install mongosh"
+        return 1
+    fi
+}
+
 # Main test execution
 main() {
-    # Check if mongosh is available
-    if ! command -v mongosh &> /dev/null; then
-        fail "mongosh not found. Please install MongoDB Shell."
+    # Install mongosh if not available
+    install_mongosh || {
         print_summary "MongoDB"
         exit 1
-    fi
+    }
 
     # Run tests
     run_test "Connectivity to MongoDB" test_connectivity

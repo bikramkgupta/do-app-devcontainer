@@ -13,6 +13,63 @@ NC='\033[0m' # No Color
 TESTS_PASSED=0
 TESTS_FAILED=0
 
+# Track if apt has been updated this session
+APT_UPDATED=false
+
+# Install a package if the command is not available
+# Usage: install_if_missing <command> [package_name]
+# If package_name is not provided, command name is used
+install_if_missing() {
+    local cmd="$1"
+    local package="${2:-$1}"
+    
+    if command -v "$cmd" &> /dev/null; then
+        return 0
+    fi
+    
+    info "Installing $package (provides $cmd)..."
+    
+    if [ "$APT_UPDATED" = false ]; then
+        sudo apt-get update -qq 2>/dev/null
+        APT_UPDATED=true
+    fi
+    
+    if sudo apt-get install -y -qq "$package" 2>/dev/null; then
+        success "Installed $package"
+        return 0
+    else
+        fail "Failed to install $package"
+        return 1
+    fi
+}
+
+# Install Python package via pip
+# Usage: pip_install_if_missing <command> <pip_package>
+# Note: Uses --break-system-packages for Ubuntu 24.04+ (PEP 668)
+# This is acceptable in a container environment
+pip_install_if_missing() {
+    local cmd="$1"
+    local package="$2"
+    
+    if command -v "$cmd" &> /dev/null; then
+        return 0
+    fi
+    
+    info "Installing $package via pip..."
+    
+    # Try with --break-system-packages for Ubuntu 24.04+ (PEP 668)
+    if pip install --quiet --break-system-packages "$package" 2>/dev/null || \
+       pip3 install --quiet --break-system-packages "$package" 2>/dev/null || \
+       pip install --quiet "$package" 2>/dev/null || \
+       pip3 install --quiet "$package" 2>/dev/null; then
+        success "Installed $package"
+        return 0
+    else
+        fail "Failed to install $package via pip"
+        return 1
+    fi
+}
+
 # Print colored status messages
 info() {
     echo -e "${BLUE}[INFO]${NC} $1"
@@ -20,12 +77,12 @@ info() {
 
 success() {
     echo -e "${GREEN}[PASS]${NC} $1"
-    ((TESTS_PASSED++))
+    ((++TESTS_PASSED)) || true
 }
 
 fail() {
     echo -e "${RED}[FAIL]${NC} $1"
-    ((TESTS_FAILED++))
+    ((++TESTS_FAILED)) || true
 }
 
 warn() {

@@ -95,7 +95,8 @@ test_verify_delete() {
 
 # Main test execution
 main() {
-    # Check if valkey-cli is available, fall back to redis-cli
+    # Install redis-tools if neither valkey-cli nor redis-cli is available
+    # redis-cli is compatible with Valkey
     if command -v valkey-cli &> /dev/null; then
         : # valkey-cli is available
     elif command -v redis-cli &> /dev/null; then
@@ -104,9 +105,14 @@ main() {
             redis-cli -h "$VALKEY_HOST" -p "$VALKEY_PORT" "$@"
         }
     else
-        fail "Neither valkey-cli nor redis-cli found. Please install one."
-        print_summary "Valkey"
-        exit 1
+        install_if_missing redis-cli redis-tools || {
+            print_summary "Valkey"
+            exit 1
+        }
+        # Redefine vcli to use redis-cli
+        vcli() {
+            redis-cli -h "$VALKEY_HOST" -p "$VALKEY_PORT" "$@"
+        }
     fi
 
     # Run tests
