@@ -25,28 +25,21 @@ This configuration uses **Docker Compose Profiles** to manage the various servic
 
 ## Getting Started
 
-1. **Create the folder**  
-   At the root of your project, create a `.devcontainer` folder.
+1. **Copy the `.devcontainer` folder**
+   Copy this entire `.devcontainer` folder to the root of your project.
 
-2. **Copy the config files**  
-   Put these files inside `.devcontainer`:
-   - `devcontainer.json`
-   - `docker-compose.yml`
-   - `postcreate.sh`
-   - `.env`
+2. **Customize your setup**
+   Edit `.devcontainer/devcontainer.json` to choose:
+   - Which services you want (databases, kafka, object storage, etc.) via `COMPOSE_PROFILES`
+   - Which languages/tools you need (Node, Python, Go, Rust, etc.) via `features`
 
-3. **Customize your setup**
-   Edit `devcontainer.json` to choose:
-   - which services you want (databases, kafka, object storage, etc.)
-   - which language/tooling you need (Node, Python, Go, Rust, etc.)
+3. **Open in a Dev Container**
+   - Install the **Dev Containers** extension in your IDE (VS Code, Cursor, etc.)
+   - Open your project folder in the IDE
+   - Run the Command Palette and choose **"Dev Containers: Open Folder in Container..."**
 
-4. **Open the folder in a Dev Container**  
-   - Install the **Dev Containers** extension in your IDE (VS Code, Cursor, etc.).
-   - Open your project folder in the IDE.
-   - Run the Command Palette and choose **“Dev Containers: Open Folder in Container…”** (or the equivalent command in your IDE).
-
-5. **Return to local**  
-   When you’re done, either close the IDE or run **“Dev Containers: Reopen Folder Locally”** from the Command Palette.
+4. **Return to local**
+   Close the IDE window or run **"Dev Containers: Reopen Folder Locally"** from the Command Palette.
 
 
 ## Default Features
@@ -108,7 +101,7 @@ To change the default set of services that start when the container opens:
 
 ### Container Shutdown Behavior
 
-By default, the `shutdownAction` in `devcontainer.json` is set to `"none"`. This means containers will keep running after you close the IDE. To change this behavior, modify the `shutdownAction` parameter. See comments in `devcontainer.json` for details.
+By default, `shutdownAction` in `devcontainer.json` is set to `"stopCompose"`. This means containers automatically stop when you close the IDE window. To keep containers running after closing, change this to `"none"`. See comments in `devcontainer.json` for details.
 
 ### Docker & Compose Tips
 
@@ -122,29 +115,42 @@ If you frequently work with Dev Containers, consider installing the DevContainer
 npm install -g @devcontainers/cli
 ```
 
-## Running Multiple Workspaces
+## Git Worktree Support
 
-Recommended: use Git worktrees (one folder per branch) and open that folder directly in Cursor/VS Code, then “Reopen in Container.” Docker Compose will prefix containers with the folder name (e.g., `main_app_1`, `feature-x_postgres_1`), keeping worktrees isolated by default.
+This devcontainer has **built-in worktree support**. The `init.sh` script automatically:
+- Detects and mounts the git common directory (`.bare`) inside the container
+- Sets `COMPOSE_PROJECT_NAME` to the folder name for proper container isolation
 
-### Quick start with worktrees
-- Create the worktree: `git worktree add ../feature-x origin/feature-x`
-- Optional: set a custom prefix in `.devcontainer/.env` for that worktree:
-  ```env
-  COMPOSE_PROJECT_NAME=my-app-feature-x
-  ```
-- Open the worktree folder in the IDE and reopen in the container. Each worktree spins up its own containers and volumes.
+### Quick Start
 
-### Port conflicts
-Ports are already dynamic (`127.0.0.1:0:PORT`), so multiple worktrees can run at once. To find host ports:
 ```bash
-docker compose -f .devcontainer/docker-compose.yml ps
-docker compose -f .devcontainer/docker-compose.yml port postgres 5432
-docker compose -f .devcontainer/docker-compose.yml port minio 9001
-```
-Inside the container, use service names/standard ports (`postgres:5432`, `minio:9000`).
+# Create a worktree
+git worktree add ../feature-x origin/feature-x
 
-### More detail
-See `docs/worktrees-devcontainer.md` for the full workflow, dynamic port notes, COMPOSE_PROJECT_NAME guidance, and a brief multi-root workspace example (works in VS Code and Cursor).
+# Open the worktree folder in VS Code/Cursor
+# Choose "Reopen in Container" - everything just works
+```
+
+Each worktree gets its own containers and volumes, completely isolated.
+
+### Multiple Worktrees at Once
+
+Ports are dynamic (`127.0.0.1:0:PORT`), so multiple worktrees can run simultaneously. To find assigned ports:
+
+```bash
+docker compose ps
+docker compose port postgres 5432
+docker compose port minio 9000
+```
+
+Inside the container, use service names directly (`postgres:5432`, `minio:9000`).
+
+### Full Guide
+
+See **[docs/worktree-setup.md](docs/worktree-setup.md)** for:
+- Initial repository setup with `.bare` structure
+- How the worktree solution works internally
+- Daily workflow and troubleshooting
 
 ## Testing Services
 
@@ -156,16 +162,16 @@ From inside the dev container, run:
 
 ```bash
 # Test all running services
-./tests/run-all-tests.sh --all
+.devcontainer/tests/run-all-tests.sh --all
 
 # Test specific services
-./tests/run-all-tests.sh postgres minio
+.devcontainer/tests/run-all-tests.sh postgres minio
 
 # List available services
-./tests/run-all-tests.sh --list
+.devcontainer/tests/run-all-tests.sh --list
 
 # Show help
-./tests/run-all-tests.sh --help
+.devcontainer/tests/run-all-tests.sh --help
 ```
 
 ### Available Test Scripts

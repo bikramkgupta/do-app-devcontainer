@@ -5,7 +5,8 @@ services:
     profiles: [ "app" ]
     volumes:
       - ..:/workspaces/app:cached
-      - /var/run/docker.sock:/var/run/docker.sock
+      # Mount git common dir (.bare for worktrees) at same path for git to work
+      - ${GIT_COMMON_DIR}:${GIT_COMMON_DIR}:cached
       # Add these for credential persistence
       - app-config:/home/vscode/.config      # All .config tools (gh, doctl, etc.)
       - claude-config:/home/vscode/.claude
