@@ -124,78 +124,27 @@ npm install -g @devcontainers/cli
 
 ## Running Multiple Workspaces
 
-If you need to work on multiple instances of this project simultaneously (e.g., different branches, different configurations), you need to ensure workspace isolation to avoid container conflicts.
+Recommended: use Git worktrees (one folder per branch) and open that folder directly in Cursor/VS Code, then “Reopen in Container.” Docker Compose will prefix containers with the folder name (e.g., `main_app_1`, `feature-x_postgres_1`), keeping worktrees isolated by default.
 
-### Required: Unique Project Names
+### Quick start with worktrees
+- Create the worktree: `git worktree add ../feature-x origin/feature-x`
+- Optional: set a custom prefix in `.devcontainer/.env` for that worktree:
+  ```env
+  COMPOSE_PROJECT_NAME=my-app-feature-x
+  ```
+- Open the worktree folder in the IDE and reopen in the container. Each worktree spins up its own containers and volumes.
 
-**IMPORTANT:** Each workspace must have a unique Docker Compose project name.
-
-Edit `.devcontainer/docker-compose.yml` and set a unique name on line 1:
-
-```yaml
-name: my-unique-project-name  # Change this for each workspace
-
-services:
-  app:
-    # ... rest of config
-```
-
-Example names:
-- `my-app-main`
-- `my-app-feature-x`
-- `my-app-testing`
-
-### Port Conflicts
-
-This setup uses dynamic port assignment to prevent port conflicts when running multiple workspaces. Docker automatically assigns available ports.
-
-**Finding assigned ports:**
-
+### Port conflicts
+Ports are already dynamic (`127.0.0.1:0:PORT`), so multiple worktrees can run at once. To find host ports:
 ```bash
-# View all containers with port mappings
 docker compose -f .devcontainer/docker-compose.yml ps
-
-# Get specific port for a service
 docker compose -f .devcontainer/docker-compose.yml port postgres 5432
 docker compose -f .devcontainer/docker-compose.yml port minio 9001
 ```
+Inside the container, use service names/standard ports (`postgres:5432`, `minio:9000`).
 
-**Connecting from your host machine:**
-
-Use the dynamically assigned port shown in `docker compose ps`. For example:
-- Postgres: `psql -h 127.0.0.1 -p 54321 -U postgres -d app` (where 54321 is the assigned port)
-- RustFS Console: Open `http://localhost:54322` in browser (where 54322 is the assigned port)
-  - Default credentials: `rustfsadmin` / `rustfsadmin`
-
-**Inside the container:**
-
-Your applications connect using standard ports and service names:
-- Database: `postgres:5432`
-- RustFS (S3): `minio:9000` (service name kept for backward compatibility)
-
-### Copying .devcontainer to a New Workspace
-
-When setting up a new workspace:
-
-1. Copy the entire `.devcontainer/` folder to your new project
-2. **MUST DO:** Edit `docker-compose.yml` and change the `name:` field (line 1)
-3. Review and update `.env` if needed
-4. Open the workspace in a Dev Container
-
-### Understanding COMPOSE_PROFILES
-
-You'll notice `COMPOSE_PROFILES` is defined in two places:
-
-**`.devcontainer/.env`:**
-- Used when running `docker compose` from your **host machine**
-- Example: `docker compose -f .devcontainer/docker-compose.yml ps`
-
-**`devcontainer.json` → `containerEnv`:**
-- Environment variables available **inside the dev container**
-- Used when running `docker compose` from within the container
-- VS Code Dev Containers reads this to know which services to start
-
-**Best Practice:** Keep both values in sync to ensure consistent behavior.
+### More detail
+See `docs/worktrees-devcontainer.md` for the full workflow, dynamic port notes, COMPOSE_PROJECT_NAME guidance, and a brief multi-root workspace example (works in VS Code and Cursor).
 
 ## Testing Services
 

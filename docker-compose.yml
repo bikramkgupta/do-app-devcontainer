@@ -1,4 +1,4 @@
-name: my-project  # IMPORTANT: Change this to your project name for multi-workspace support
+# Compose project name defaults to the folder; set COMPOSE_PROJECT_NAME in a .env file to override.
 services:
   app:
     image: mcr.microsoft.com/devcontainers/base:noble
