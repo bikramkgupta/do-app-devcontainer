@@ -30,14 +30,15 @@
     "COMPOSE_PROFILES": "app,postgres,minio"
   },
   "remoteEnv": {},
+  "initializeCommand": "cd \"${localWorkspaceFolder}\" && bash .devcontainer/init.sh",
   "postCreateCommand": ".devcontainer/post-create.sh",
   "remoteUser": "vscode",
   "userEnvProbe": "loginInteractiveShell",
-  // "shutdownAction": Indicates whether devcontainer.json supporting tools should stop the containers when the related tool window is closed / shut down. 
+  // "shutdownAction": Indicates whether devcontainer.json supporting tools should stop the containers when the related tool window is closed / shut down.
   // Values are none, stopContainer (default for image or Dockerfile), and stopCompose (default for Docker Compose).
-  // This is used to prevent the containers from shutting down when the related tool window is closed.
-  // use docker compose stop to stop and docker compose down to stop and remove the containers
-  "shutdownAction": "none",
+  // Using stopCompose so containers automatically stop when the devcontainer window is closed.
+  // Use docker compose stop to stop and docker compose down to stop and remove the containers manually.
+  "shutdownAction": "stopCompose",
   "customizations": {
     "vscode": {
       "extensions": [
