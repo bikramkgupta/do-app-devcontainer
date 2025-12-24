@@ -13,6 +13,7 @@
     // "ghcr.io/devcontainers/features/ruby:1": {}
     // "ghcr.io/devcontainers/features/php:1": {},
     "ghcr.io/devcontainers-extra/features/digitalocean-cli:1": {},
+    "ghcr.io/devcontainers/features/aws-cli:1": {},
     "ghcr.io/anthropics/devcontainer-features/claude-code:1": {},
     // Script location: https://github.com/jsburckhardt/devcontainer-features/blob/main/src/codex/install.sh
     "ghcr.io/jsburckhardt/devcontainer-features/codex:1": {},
