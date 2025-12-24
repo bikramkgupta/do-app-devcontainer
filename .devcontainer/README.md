@@ -237,6 +237,8 @@ const client = new S3Client({
 2. Open your project folder
 3. Run Command Palette → **"Dev Containers: Open Folder in Container..."**
 
+> **Note:** Before opening the devcontainer, review the project's README for any environment setup requirements (e.g., creating `.env` files, configuring services, etc.) and make necessary enhancements to add DevContainer-specific information.
+
 ### Git Worktree Support
 
 This devcontainer has built-in worktree support. The `init.sh` script automatically detects and mounts the git common directory.
